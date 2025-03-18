@@ -122,12 +122,10 @@ nb-configuration.xml
 # Visual Studio Code
 .vscode/
 
-/results/
-/phpunit*.xml
-/writable/*
-/public/uploads/*
-/vendor/*
-/node_modules/*
-/env
-/.env
+vendor/
+writable/
+.env
+*.log
 
+
+public/uploads/
