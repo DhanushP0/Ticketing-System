@@ -11,9 +11,9 @@ A robust and efficient system for managing call center operations, built with Co
 ✅ Reports & data export
 
 🛠️ Technologies Used<br>
-Backend: CodeIgniter 4, PHP
-Database: MySQL
-Frontend: Bootstrap, jQuery
+Backend: CodeIgniter 4, PHP <br>
+Database: MySQL<br>
+Frontend: Bootstrap, jQuery <br>
 Server: XAMPP (Local Development)
 
 🎬 Demo Video<br>
