@@ -39,20 +39,6 @@ CREATE TABLE `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `admins`
---
-
-INSERT INTO `admins` (`id`, `name`, `email`, `password`, `category`, `role`, `created_at`, `profile_picture`) VALUES
-(1, 'Super Admin', 'superadmin@example.com', '$2y$10$mAZ5zBMCKWvGCR4LDjhgb.Dbb.VSkX.lN6FqnABhccZ/XryBl/1lq', NULL, 'superadmin', '2025-02-26 07:55:15', NULL),
-(2, 'admin1', 'zzz@gmail.com', '$2y$12$t0GTZuvJ40vov7oaJt.AVeeSmeqtsQ28TyebMgAD3CC5AteDWGgA6', 'Technical Support', 'admin', '2025-03-01 09:28:54',NULL),
-(3, 'yyy', 'yyy@gmail.com', '$2y$12$6FcVDeUj34GEUV.7BZapDuYWwKj3Fyz5ShV97qbzfa6a6CF9D28uq', 'Billing', 'admin', '2025-03-01 09:50:46', NULL),
-(4, 'www', 'www@gmail.com', '$2y$12$i4adAQrZiEyVkhVsz2bg0ux3JW438x2SSKhygABCh78LB8abB5cHa', 'General Inquiry', 'admin', '2025-03-01 09:51:17', NULL),
-(5, 'vvv', 'vvv@gmail.com', '$2y$12$p.Xf1GuVOV2NKqd1Uakn6eDExXv7LaQCRe1l24CxmpgF2jdSRsMkW', 'Account Issues', 'admin', '2025-03-01 09:51:43', NULL),
-(6, 'admin2', 'mmm@gmail.com', '$2y$12$mMM1SovF2u23ITTIZbmngu.cEGnTZpCu9CQ1/KlfDWkFQASkr7klK', 'Technical Support', 'admin', '2025-03-09 14:31:03', NULL);
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `admin_activity`
 --
 
