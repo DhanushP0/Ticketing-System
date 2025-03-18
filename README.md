@@ -26,7 +26,7 @@ A modern and efficient ticketing system built with CodeIgniter 4, designed for s
 - Server: XAMPP (Local Development)  
 
  🎬 Demo Video  
-📌 GitHub does not support direct video playback. Click below to download/watch videos.**  
+📌 GitHub does not support direct video playback. Click below to download/watch videos. 
 
 [📹 User Page](https://github.com/DhanushP92922/Ticketing-System/raw/main/media/1.mp4)  
 [📹 Admin Page](https://github.com/DhanushP92922/Ticketing-System/raw/main/media/2.mp4)  
