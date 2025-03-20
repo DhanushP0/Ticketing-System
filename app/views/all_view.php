@@ -1,3 +1,24 @@
+<?php
+$session = session();
+
+// 🚫 Redirect based on user role
+if ($session->get('admin_id')) {
+    header("Location: " . base_url('admin/dashboard'));
+    exit();
+} elseif ($session->get('user_id')) {
+    header("Location: " . base_url('user/ticket_status/' . $session->get('ticket_id')));
+    exit();
+} elseif ($session->get('superadmin_id')) {
+    header("Location: " . base_url('superadmin/dashboard'));
+    exit();
+}
+
+// 🔥 Prevent browser caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -196,6 +217,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function() {
+        window.history.pushState(null, "", window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, "", window.location.href);
+            location.replace("<?= base_url('admin/dashboard') ?>"); // Default redirection
+        };
+    })();
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>

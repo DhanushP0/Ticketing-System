@@ -1,3 +1,18 @@
+<?php
+$session = session();
+
+// 🚫 Redirect if already logged in as Admin
+if ($session->get('admin_id')) {
+    header("Location: " . base_url('admin/dashboard'));
+    exit();
+}
+
+// 🔥 Prevent browser from caching this page
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -196,6 +211,14 @@
                 toggleIcon.classList.add('fa-eye');
             }
         }
+        (function() {
+        window.history.pushState(null, "", window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, "", window.location.href);
+            location.replace("<?= base_url('admin/dashboard') ?>");
+        };
+    })();
+
     </script>
 </body>
 </html>

@@ -15,6 +15,17 @@ class SuperadminController extends Controller
         session(); // Start session
         $this->ticketStatusModel = new TicketStatus();
     }
+    public function allView()
+{
+    $session = session();
+
+    // 🚫 Redirect logged-in superadmins to the superadmin dashboard
+    if ($session->get('superadmin_id')) {
+        return redirect()->to(base_url('superadmin/dashboard'));
+    }
+
+    return view('all_view'); // ✅ Load only for non-logged-in users
+}
 
     public function login()
     {

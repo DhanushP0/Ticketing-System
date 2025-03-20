@@ -8,6 +8,18 @@ use CodeIgniter\Controller;
 
 class AdminController extends BaseController
 {
+    public function allView()
+{
+    $session = session();
+
+    // 🚫 Redirect logged-in admins to the dashboard
+    if ($session->get('admin_id')) {
+        return redirect()->to(base_url('admin/dashboard'));
+    }
+
+    return view('all_view'); // ✅ Load only for non-logged-in users
+}
+
     public function login()
     {
         return view('admin/login');
@@ -15,30 +27,32 @@ class AdminController extends BaseController
 
     public function authenticate()
     {
-        $session = session();
+        $session = session(); // No need for session_start()
         $adminModel = new \App\Models\AdminModel();
-
+    
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
-
+    
         $admin = $adminModel->where('email', $email)->first();
-
+    
         if ($admin && password_verify($password, $admin['password'])) {
-            // ✅ Store admin session with category
+            $session->regenerate(); // Secure session handling
+    
             $session->set([
                 'admin_id' => $admin['id'],
                 'admin_name' => $admin['name'],
                 'admin_email' => $admin['email'],
-                'category' => $admin['category'], // Store admin's category
+                'category' => $admin['category'],
                 'role' => 'admin',
                 'is_logged_in' => true
             ]);
-
+    
             return redirect()->to(base_url('admin/dashboard'))->with('success', 'Login successful!');
-        } else {
-            return redirect()->to(base_url('admin/login'))->with('error', 'Invalid email or password.');
         }
+    
+        return redirect()->to(base_url('admin/login'))->with('error', 'Invalid email or password.');
     }
+    
     //     public function index()
 // {
 //     $db = \Config\Database::connect();
@@ -166,7 +180,7 @@ class AdminController extends BaseController
             'message' => $message
         ]);
     }
-    
+
     public function logout()
     {
         session()->destroy();
@@ -210,7 +224,6 @@ class AdminController extends BaseController
 
         return view('admin/ticket', $data);
     }
-
 
     public function updateProfile()
     {

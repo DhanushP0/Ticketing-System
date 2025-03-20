@@ -30,9 +30,7 @@ class AdminAuth extends Controller
             return redirect()->to('admin/login')->with('error', 'Invalid email or password.');
         }
     }
-    
-
-    
+        
     public function authenticate()
     {
         $adminModel = new AdminModel();

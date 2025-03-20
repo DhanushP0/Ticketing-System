@@ -1,3 +1,18 @@
+<?php
+$session = session();
+
+// 🚫 Redirect if already logged in as Superadmin
+if ($session->get('superadmin_id')) {
+    header("Location: " . base_url('superadmin/dashboard'));
+    exit();
+}
+
+// 🔥 Prevent browser caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -185,6 +200,13 @@
                 icon.classList.add('bi-eye-slash');
             }
         });
+        (function() {
+        window.history.pushState(null, "", window.location.href);
+        window.onpopstate = function () {
+            window.history.pushState(null, "", window.location.href);
+            location.replace("<?= base_url('superadmin/dashboard') ?>");
+        };
+    })();
     </script>
 </body>
 </html>

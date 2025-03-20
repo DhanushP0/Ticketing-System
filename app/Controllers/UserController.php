@@ -21,6 +21,18 @@ class UserController extends Controller
         // Load the database
         $this->db = Database::connect();
     }
+//     public function allView()
+// {
+//     $session = session();
+
+//     // 🚫 Redirect logged-in users to the user dashboard
+//     if ($session->get('user_id')) {
+//         return redirect()->to(base_url('user/dashboard'));
+//     }
+
+//     return view('all_view'); // ✅ Load only for non-logged-in users
+// }
+
     public function logout()
     {
         $session = session();
