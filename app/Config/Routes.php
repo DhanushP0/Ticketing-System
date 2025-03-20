@@ -31,7 +31,6 @@ $routes->post('user/check_ticket_status', 'UserController::checkTicketStatus');
 $routes->get('user/ticket_success/(:any)', 'UserController::ticketSuccess/$1');
 $routes->get('user/ticket_status/(:any)', 'UserController::ticketStatus/$1');
 $routes->get('user/ticket_status', 'UserController::ticketStatus');
-$routes->get('user/tickets', 'UserController::tickets');
 $routes->get('user/message/(:segment)/(:segment)', 'UserController::message/$1/$2');
 $routes->post('user/sendMessage', 'UserController::sendMessage');
 $routes->get('user/getMessages', 'UserController::getMessages');

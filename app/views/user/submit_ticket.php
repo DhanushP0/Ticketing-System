@@ -111,7 +111,7 @@
                         
                         <div class="mt-4 text-center">
                             <p class="mb-2">Already submitted a ticket?</p>
-                            <a href="<?= base_url('user/tickets') ?>" class="btn btn-outline-secondary">
+                            <a href="<?= base_url('user/ticket_status') ?>" class="btn btn-outline-secondary">
                                 <i class="bi bi-clock-history me-2"></i>Check Ticket Status
                             </a>
                         </div>

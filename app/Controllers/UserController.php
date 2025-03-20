@@ -87,7 +87,6 @@ class UserController extends Controller
         return redirect()->to(site_url('user/ticket_status/' . $ticket['ticket_id']));
     }
 
-
     public function ticketStatus($ticketId = null)
     {
         if (!session()->get('isLoggedIn') || session()->get('role') !== 'user') {
