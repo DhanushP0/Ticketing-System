@@ -269,29 +269,32 @@ class AdminController extends BaseController
         $session = session();
         $ticketModel = new TicketModel();
         $adminModel = new AdminModel();
-
+    
         $adminId = $session->get('admin_id');
-
+    
         // Check if the ticket exists and is assigned to the logged-in admin
         $ticket = $ticketModel->find($ticketId);
         if (!$ticket || $ticket['assigned_admin_id'] != $adminId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Invalid ticket or not assigned to you.']);
         }
-
-        // Update the ticket status to 'Resolved'
-        $ticketModel->update($ticketId, ['status' => 'Resolved']);
-
+    
+        // Update the ticket status to 'Resolved' and set resolved_at timestamp
+        $ticketModel->update($ticketId, [
+            'status' => 'Resolved',
+            'resolved_at' => date('Y-m-d H:i:s') // ✅ Set resolved_at to current timestamp
+        ]);
+    
         // Get the admin's category
         $admin = $adminModel->find($adminId);
         $adminCategory = $admin ? $admin['category'] : null;
-
+    
         if (!$adminCategory) {
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Ticket resolved! No category found for admin.'
             ]);
         }
-
+    
         // Find the next unassigned ticket **within the same category**
         $nextTicket = $ticketModel->where('category', $adminCategory)
             ->where('assigned_admin_id', null) // NULL check
@@ -299,11 +302,11 @@ class AdminController extends BaseController
             ->orderBy("FIELD(urgency, 'High', 'Medium', 'Low')")
             ->orderBy('created_at', 'ASC')
             ->first();
-
+    
         if ($nextTicket) {
             // Assign the next ticket to the current admin
             $ticketModel->update($nextTicket['id'], ['assigned_admin_id' => $adminId]);
-
+    
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Ticket resolved! You have been assigned a new ticket.',
@@ -311,7 +314,7 @@ class AdminController extends BaseController
                 'next_ticket_title' => $nextTicket['title']
             ]);
         }
-
+    
         return $this->response->setJSON([
             'success' => true,
             'message' => 'Ticket resolved! No more pending tickets to assign in your category.'
@@ -502,7 +505,7 @@ class AdminController extends BaseController
 
         return view('admin/dashboard', $data);
     }
-    //     public function filterTickets()
+//     public function filterTickets()
 // {
 //     $page = $this->request->getGet('page') ?? 1;
 //     $rowsPerPage = $this->request->getGet('rows') ?? 5;
@@ -726,8 +729,6 @@ class AdminController extends BaseController
 
     return $this->response->setJSON(['ticket_logs' => $ticket_logs]);
 }
-
-
 
 }
 

@@ -8,24 +8,28 @@ use App\Models\TicketStatus;
 class SuperadminController extends Controller
 {
     protected $ticketStatusModel;
+    protected $ticketModel;
+    protected $adminModel;
 
     public function __construct()
     {
         helper(['url', 'form']);
         session(); // Start session
         $this->ticketStatusModel = new TicketStatus();
+        $this->ticketModel = new TicketModel();
+        $this->adminModel = new AdminModel();
     }
     public function allView()
-{
-    $session = session();
+    {
+        $session = session();
 
-    // 🚫 Redirect logged-in superadmins to the superadmin dashboard
-    if ($session->get('superadmin_id')) {
-        return redirect()->to(base_url('superadmin/dashboard'));
+        // 🚫 Redirect logged-in superadmins to the superadmin dashboard
+        if ($session->get('superadmin_id')) {
+            return redirect()->to(base_url('superadmin/dashboard'));
+        }
+
+        return view('all_view'); // ✅ Load only for non-logged-in users
     }
-
-    return view('all_view'); // ✅ Load only for non-logged-in users
-}
 
     public function login()
     {
@@ -89,29 +93,71 @@ class SuperadminController extends Controller
         session()->destroy();
         return redirect()->to(base_url('superadmin/login'))->with('success', 'Logged out successfully!');
     }
-
-    public function superadminDashboard()
+    public function dashboard()
     {
         $session = session();
 
-        // Ensure only superadmins can access this page
-        if (!$session->get('is_logged_in') || $session->get('role') !== 'superadmin') {
+        // Ensure only superadmins can access
+        if ($session->get('role') !== 'superadmin') {
             return redirect()->to(base_url('superadmin/login'))->with('error', 'Unauthorized Access');
         }
 
-        $adminModel = new AdminModel();
         $ticketModel = new TicketModel();
+        $adminModel = new AdminModel();
 
-        // Fetch superadmin details
-        $superadmin = $adminModel->find($session->get('superadmin_id'));
+        // Fetch ticket stats
+        $totalTickets = $ticketModel->countAllResults();
+        $admins = $adminModel->findAll();
+        $openTickets = $ticketModel->where('status', 'Open')->countAllResults();
+        $resolvedTickets = $ticketModel->where('status', 'Resolved')->countAllResults();
+        $inProgressTickets = $ticketModel->where('status', 'In Progress')->countAllResults();
+        $closedTickets = $ticketModel->where('status', 'Closed')->countAllResults();
 
-        // Get total tickets count
-        $totalTickets = $ticketModel->countAll();
+        // Urgency Overview
+        $lowUrgency = $ticketModel->where('urgency', 'Low')->countAllResults();
+        $mediumUrgency = $ticketModel->where('urgency', 'Medium')->countAllResults();
+        $highUrgency = $ticketModel->where('urgency', 'High')->countAllResults();
 
-        return view('superadmin/superadmin_dashboard', [
-            'superadmin' => $superadmin,
-            'totalTickets' => $totalTickets
-        ]);
+        // Fetch category-wise ticket distribution
+        $ticketsByCategory = $ticketModel
+            ->select('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->findAll();
+
+        $ticketsByCategoryArray = [];
+        foreach ($ticketsByCategory as $row) {
+            $ticketsByCategoryArray[$row['category']] = $row['count'];
+        }
+
+        // Fetch average response time safely
+        $query = $ticketModel->selectAvg('response_time')->get();
+        $row = ($query && $query->getNumRows() > 0) ? $query->getRow() : null;
+        $avgResponseTime = $row ? round($row->response_time, 2) : 0;
+
+        // Fetch total admins
+        $totalAdmins = $adminModel->countAllResults();
+
+        // Fetch recent tickets (limit to 5)
+        $recentTickets = $ticketModel->orderBy('created_at', 'DESC')->limit(5)->find();
+
+        // Prepare data for view
+        $data = [
+            'totalTickets' => $totalTickets,
+            'resolvedTickets' => $resolvedTickets,
+            'openTickets' => $openTickets,
+            'inProgressTickets' => $inProgressTickets,
+            'closedTickets' => $closedTickets,
+            'lowUrgency' => $lowUrgency,
+            'mediumUrgency' => $mediumUrgency,
+            'highUrgency' => $highUrgency,
+            'avgResponseTime' => $avgResponseTime,
+            'totalAdmins' => $totalAdmins,
+            'admins' => $admins,
+            'ticketsByCategory' => $ticketsByCategoryArray,
+            'recentTickets' => $recentTickets
+        ];
+
+        return view('superadmin/superadmin_dashboard', $data);
     }
 
     public function ticket()
@@ -366,37 +412,6 @@ class SuperadminController extends Controller
 
         return redirect()->back()->with('success', 'Admin assigned successfully.');
     }
-    public function dashboard()
-    {
-        $ticketModel = new TicketModel();
-        $userModel = new UserModel();
-        $adminModel = new AdminModel();
-        $activityModel = new ActivityModel();
-
-        // Fetch data from database
-        $data['tickets'] = $ticketModel->findAll(); // Get all tickets
-        $data['totalUsers'] = $userModel->countAll(); // Get total users
-        $data['activeAdmins'] = $adminModel->where('role', 'admin')->countAllResults(); // Count active admins
-
-        // Count resolved tickets
-        $data['resolvedTickets'] = $ticketModel->where('status', 'Resolved')->countAllResults();
-
-        // Ticket Growth Example (Last 7 days)
-        $lastWeekTickets = $ticketModel->where('created_at >=', date('Y-m-d', strtotime('-7 days')))->countAllResults();
-        $data['ticketGrowth'] = $lastWeekTickets > 0 ? round(($lastWeekTickets / max(count($data['tickets']), 1)) * 100) : 0;
-
-        // User Growth Example
-        $lastWeekUsers = $userModel->where('created_at >=', date('Y-m-d', strtotime('-7 days')))->countAllResults();
-        $data['userGrowth'] = $lastWeekUsers > 0 ? round(($lastWeekUsers / max($data['totalUsers'], 1)) * 100) : 0;
-
-        // Resolution Rate Example
-        $data['resolutionRate'] = count($data['tickets']) > 0 ? round(($data['resolvedTickets'] / count($data['tickets'])) * 100) : 0;
-
-        // Fetch Admin Activity Logs
-        $data['adminActivities'] = $activityModel->orderBy('timestamp', 'DESC')->findAll(5); // Get last 5 admin activities
-
-        return view('superadmin/dashboard', $data);
-    }
     public function getAdminActivityLog()
     {
         $db = \Config\Database::connect();
@@ -422,6 +437,86 @@ class SuperadminController extends Controller
             return $this->response->setStatusCode(404)->setJSON(['message' => 'No history found']);
         }
     }
+    public function getTicketStats()
+    {
+        $ticketModel = new TicketModel();
+    
+        // Fetch ticket stats
+        $totalTickets = $ticketModel->countAllResults();
+        $openTickets = $ticketModel->where('status', 'Open')->countAllResults();
+        $resolvedTickets = $ticketModel->where('status', 'Resolved')->countAllResults();
+        $inProgressTickets = $ticketModel->where('status', 'In Progress')->countAllResults();
+        $closedTickets = $ticketModel->where('status', 'Closed')->countAllResults();
+    
+        // Urgency Overview
+        $lowUrgency = $ticketModel->where('urgency', 'Low')->countAllResults();
+        $mediumUrgency = $ticketModel->where('urgency', 'Medium')->countAllResults();
+        $highUrgency = $ticketModel->where('urgency', 'High')->countAllResults();
+    
+        // Fetch category-wise ticket distribution
+        $ticketsByCategory = $ticketModel
+            ->select('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->findAll();
+    
+        $ticketsByCategoryArray = [];
+        foreach ($ticketsByCategory as $row) {
+            $ticketsByCategoryArray[] = [
+                'category' => $row['category'],
+                'count' => (int) $row['count']
+            ];
+        }
+    
+        // Fetch average response time safely
+        $query = $ticketModel->selectAvg('response_time')->get();
+        $row = ($query && $query->getNumRows() > 0) ? $query->getRow() : null;
+        $avgResponseTime = $row ? round($row->response_time, 2) : 0;
+    
+        // ✅ Fetch New & Resolved Tickets for the Last 7 Days
+        $dates = [];
+        $newTicketsData = [];
+        $resolvedTicketsData = [];
+    
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $dates[] = $date;
+    
+            // ✅ Correct date filtering for ticket creation
+            $newTickets = $ticketModel
+                ->where("DATE(created_at)", $date)
+                ->countAllResults();
+    
+            // ✅ Corrected query to count resolved tickets per day
+            $resolvedTickets = $ticketModel
+                ->where("DATE(updated_at)", $date)
+                ->where('status', 'Resolved')
+                ->countAllResults(); // ✅ This now returns an integer count
+    
+            $newTicketsData[] = $newTickets;
+            $resolvedTicketsData[] = $resolvedTickets; // ✅ Store the count properly
+        }
+    
+        // Prepare JSON response
+        $stats = [
+            'total_tickets' => $totalTickets,
+            'open_tickets' => $openTickets,
+            'in_progress_tickets' => $inProgressTickets,
+            'resolved_tickets' => $resolvedTickets,
+            'closed_tickets' => $closedTickets,
+            'low_urgency' => $lowUrgency,
+            'medium_urgency' => $mediumUrgency,
+            'high_urgency' => $highUrgency,
+            'tickets_by_category' => $ticketsByCategoryArray,
+            'avg_response_time' => $avgResponseTime,
+            'dates' => $dates,
+            'new_tickets' => $newTicketsData,
+            'resolved_tickets_per_day' => $resolvedTicketsData
+        ];
+    
+        return $this->response->setJSON($stats);
+    }
+    
+    
 }
 
 

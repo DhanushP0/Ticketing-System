@@ -61,7 +61,7 @@ $routes->get('admin/getLogs', 'AdminController::getLogs');
 // Superadmin Routes
 $routes->get('/superadmin/login', 'SuperadminController::login');
 $routes->post('/superadmin/authenticate', 'SuperadminController::authenticate');
-$routes->get('/superadmin/dashboard', 'SuperadminController::index', ['filter' => 'auth']);
+$routes->get('superadmin/dashboard', 'SuperAdminController::dashboard');
 $routes->get('superadmin/ticket', 'SuperAdminController::ticket');
 $routes->get('superadmin/profile', 'SuperAdminController::profile');
 // Superadmin Routes for Managing Admins
@@ -73,7 +73,7 @@ $routes->post('superadmin/assign-ticket', 'SuperadminController::assignTicket', 
 $routes->get('superadmin/manageAdmins', 'SuperadminController::listAdmins');
 $routes->post('superadmin/assignAdmin', 'SuperAdminController::assignAdmin');
 $routes->get('ticket/getTicketHistory/(:num)', 'superadminController::getTicketHistory/$1');
-
+$routes->get('superadmin/getTicketStats', 'SuperadminController::getTicketStats');
 
 // Uploads Route
 $routes->get('uploads/(:any)', 'ProfileController::serveImage/$1');

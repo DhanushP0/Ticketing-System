@@ -38,7 +38,7 @@
                   <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-filter me-2"></i> Filter
                   </button>
-                  <div class="dropdown-menu p-3" style="width: 280px;">
+                  <div class="dropdown-menu p-3" style="width: 280px; height:200px; overflow:scroll;">
                     <h6 class="dropdown-header">Filter Options</h6>
                     <div class="mb-3">
                       <label class="form-label">Category</label>
