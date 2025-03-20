@@ -1,13 +1,13 @@
 <?php
 $session = session();
 
-// 🚫 Redirect if already logged in as Superadmin
+// Redirect to dashboard if already logged in
 if ($session->get('superadmin_id')) {
     header("Location: " . base_url('superadmin/dashboard'));
     exit();
 }
 
-// 🔥 Prevent browser caching
+// Prevent browser from caching the login page
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
@@ -122,8 +122,9 @@ header("Pragma: no-cache");
         
         .input-group-text {
             background-color: transparent;
-            border-right: none;
             padding-right: 0;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
         }
         
         .password-input {
@@ -201,8 +202,11 @@ header("Pragma: no-cache");
             }
         });
         (function() {
+        // Remove previous history state
         window.history.pushState(null, "", window.location.href);
+        
         window.onpopstate = function () {
+            // If the user presses Back, force redirect to dashboard
             window.history.pushState(null, "", window.location.href);
             location.replace("<?= base_url('superadmin/dashboard') ?>");
         };

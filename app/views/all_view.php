@@ -223,7 +223,7 @@ header("Pragma: no-cache");
         window.history.pushState(null, "", window.location.href);
         window.onpopstate = function () {
             window.history.pushState(null, "", window.location.href);
-            location.replace("<?= base_url('admin/dashboard') ?>"); // Default redirection
+            location.replace("<?= base_url('superadmin/dashboard') ?>");
         };
     })();
 </script>
