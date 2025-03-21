@@ -354,49 +354,117 @@ class SuperadminController extends Controller
             return redirect()->back()->with('error', 'Failed to update admin');
         }
     }
+    public function deleteAdmin()
+    {
+        $adminModel = new \App\Models\AdminModel();
+        $id = $this->request->getPost('id'); // Get the admin ID from POST data
+    
+        if (!$id) {
+            return redirect()->back()->with('error', 'Invalid Admin ID.');
+        }
+    
+        $admin = $adminModel->find($id);
+        if (!$admin) {
+            return redirect()->back()->with('error', 'Admin not found.');
+        }
+        if ($admin['role'] === 'superadmin') {
+            return redirect()->back()->with('error', 'Cannot delete Superadmin.');
+        }
+    
+        if ($adminModel->delete($id)) {
+            return redirect()->back()->with('success', 'Admin deleted successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Failed to delete admin.');
+        }
+    }    
     public function assignAdmin()
     {
         $ticketModel = new TicketModel();
         $adminModel = new AdminModel();
         $ticketStatusModel = new TicketStatus(); // Ticket Status Log Model
         $request = $this->request;
-
+    
         // Get data from POST request
         $ticketId = $request->getPost('ticket_id');
         $newAdminId = $request->getPost('admin_id');
-
+    
+        log_message('debug', 'Received Ticket ID: ' . json_encode($ticketId));
+        log_message('debug', 'Received Admin ID: ' . json_encode($newAdminId));
+    
         // Validate input
         if (!$ticketId || !$newAdminId) {
+            log_message('error', 'Invalid input: Ticket ID or Admin ID is missing');
             return redirect()->back()->with('error', 'Invalid input.');
         }
-
+    
         // Get ticket and admin details
         $ticket = $ticketModel->find($ticketId);
         $newAdmin = $adminModel->find($newAdminId);
-
-        if (!$ticket || !$newAdmin || $newAdmin['category'] !== $ticket['category']) {
+    
+        log_message('debug', 'Ticket Data: ' . json_encode($ticket));
+        log_message('debug', 'New Admin Data: ' . json_encode($newAdmin));
+    
+        if (!$ticket) {
+            log_message('error', 'Ticket not found in the database.');
+            return redirect()->back()->with('error', 'Ticket not found.');
+        }
+    
+        if (!$newAdmin) {
+            log_message('error', 'Admin not found in the database.');
+            return redirect()->back()->with('error', 'Admin not found.');
+        }
+    
+        log_message('debug', 'Ticket Category: ' . json_encode($ticket['category']));
+        log_message('debug', 'Admin Category: ' . json_encode($newAdmin['category']));
+    
+        // Fix category comparison
+        if (trim((string) $newAdmin['category']) !== trim((string) $ticket['category'])) {
+            log_message('error', 'Category mismatch: Ticket Category (' . $ticket['category'] . ') does not match Admin Category (' . $newAdmin['category'] . ')');
             return redirect()->back()->with('error', 'Invalid Admin Selection.');
         }
-
+    
+        log_message('debug', 'Admin successfully validated, proceeding to assignment.');
+    
         // Get the old status before updating
         $oldStatus = $ticket['status'];
-
+    
         // Update assigned admin
         if (!$ticketModel->update($ticketId, ['assigned_admin_id' => $newAdminId])) {
+            log_message('error', 'Failed to assign admin in database.');
             return redirect()->back()->with('error', 'Failed to assign admin.');
         }
+    
+        log_message('debug', 'Admin assigned successfully.');
+    
+        $adminName = session()->get('superadmin_name'); // Use the correct key
 
-        // Get logged-in admin's name from session
-        $adminName = session()->get('admin_name');
-
+        if (!$adminName) {
+            log_message('error', 'Session superadmin_name is missing.');
+            return redirect()->back()->with('error', 'Session expired. Please log in again.');
+        }        
+        
+        log_message('debug', 'Session Admin Name: ' . json_encode($adminName));
+        
+        $adminData = $adminModel->where('LOWER(name)', strtolower($adminName))->first();
+        
+        if (!$adminData) {
+            log_message('error', 'No matching admin found in the database for name: ' . json_encode($adminName));
+            return redirect()->back()->with('error', 'Admin not found in system.');
+        }
+        
+        $adminId = $adminData['id'];  // Correct admin ID
+        
+    
         // Fetch admin ID by name
         $adminData = $adminModel->where('name', $adminName)->first();
         if (!$adminData) {
+            log_message('error', 'Logged-in Admin not found in database.');
             return redirect()->back()->with('error', 'Admin not found.');
         }
-
+    
         $adminId = $adminData['id']; // Correctly fetched admin ID
-
+        log_message('debug', 'Logged-in Admin ID: ' . json_encode($adminId));
+    
         // Insert into `ticket_status_log`
         $statusLogData = [
             'ticket_id' => $ticketId,
@@ -405,13 +473,16 @@ class SuperadminController extends Controller
             'new_status' => $ticket['status'], // Ensure status is updated
             'changed_at' => date('Y-m-d H:i:s')
         ];
-
+    
         if (!$ticketStatusModel->insert($statusLogData)) {
+            log_message('error', 'Failed to log status change.');
             return redirect()->back()->with('error', 'Failed to log status change.');
         }
-
+    
+        log_message('debug', 'Status log inserted successfully.');
+    
         return redirect()->back()->with('success', 'Admin assigned successfully.');
-    }
+    }    
     public function getAdminActivityLog()
     {
         $db = \Config\Database::connect();
@@ -440,25 +511,25 @@ class SuperadminController extends Controller
     public function getTicketStats()
     {
         $ticketModel = new TicketModel();
-    
+
         // Fetch ticket stats
         $totalTickets = $ticketModel->countAllResults();
         $openTickets = $ticketModel->where('status', 'Open')->countAllResults();
         $resolvedTickets = $ticketModel->where('status', 'Resolved')->countAllResults();
         $inProgressTickets = $ticketModel->where('status', 'In Progress')->countAllResults();
         $closedTickets = $ticketModel->where('status', 'Closed')->countAllResults();
-    
+
         // Urgency Overview
         $lowUrgency = $ticketModel->where('urgency', 'Low')->countAllResults();
         $mediumUrgency = $ticketModel->where('urgency', 'Medium')->countAllResults();
         $highUrgency = $ticketModel->where('urgency', 'High')->countAllResults();
-    
+
         // Fetch category-wise ticket distribution
         $ticketsByCategory = $ticketModel
             ->select('category, COUNT(*) as count')
             ->groupBy('category')
             ->findAll();
-    
+
         $ticketsByCategoryArray = [];
         foreach ($ticketsByCategory as $row) {
             $ticketsByCategoryArray[] = [
@@ -466,36 +537,36 @@ class SuperadminController extends Controller
                 'count' => (int) $row['count']
             ];
         }
-    
+
         // Fetch average response time safely
         $query = $ticketModel->selectAvg('response_time')->get();
         $row = ($query && $query->getNumRows() > 0) ? $query->getRow() : null;
         $avgResponseTime = $row ? round($row->response_time, 2) : 0;
-    
+
         // ✅ Fetch New & Resolved Tickets for the Last 7 Days
         $dates = [];
         $newTicketsData = [];
         $resolvedTicketsData = [];
-    
+
         for ($i = 6; $i >= 0; $i--) {
             $date = date('Y-m-d', strtotime("-$i days"));
             $dates[] = $date;
-    
+
             // ✅ Correct date filtering for ticket creation
             $newTickets = $ticketModel
                 ->where("DATE(created_at)", $date)
                 ->countAllResults();
-    
+
             // ✅ Corrected query to count resolved tickets per day
             $resolvedTickets = $ticketModel
                 ->where("DATE(updated_at)", $date)
                 ->where('status', 'Resolved')
                 ->countAllResults(); // ✅ This now returns an integer count
-    
+
             $newTicketsData[] = $newTickets;
             $resolvedTicketsData[] = $resolvedTickets; // ✅ Store the count properly
         }
-    
+
         // Prepare JSON response
         $stats = [
             'total_tickets' => $totalTickets,
@@ -512,11 +583,11 @@ class SuperadminController extends Controller
             'new_tickets' => $newTicketsData,
             'resolved_tickets_per_day' => $resolvedTicketsData
         ];
-    
+
         return $this->response->setJSON($stats);
     }
-    
-    
+
+
 }
 
 

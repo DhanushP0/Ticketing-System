@@ -65,10 +65,11 @@ $routes->get('superadmin/dashboard', 'SuperAdminController::dashboard');
 $routes->get('superadmin/ticket', 'SuperAdminController::ticket');
 $routes->get('superadmin/profile', 'SuperAdminController::profile');
 // Superadmin Routes for Managing Admins
+$routes->post('superadmin/addAdmin', 'SuperadminController::addAdmin');
 $routes->get('superadmin/listAdmin', 'SuperadminController::listAdmins');
 $routes->post('superadmin/editAdmin', 'SuperadminController::editAdmin');
 $routes->post('superadmin/editAdmin/(:num)', 'SuperadminController::editAdmin/$1');
-$routes->get('superadmin/delete-admin/(:num)', 'SuperadminController::deleteAdmin/$1', ['filter' => 'authGuard']);
+$routes->post('superadmin/deleteAdmin', 'SuperadminController::deleteAdmin');
 $routes->post('superadmin/assign-ticket', 'SuperadminController::assignTicket', ['filter' => 'authGuard']);
 $routes->get('superadmin/manageAdmins', 'SuperadminController::listAdmins');
 $routes->post('superadmin/assignAdmin', 'SuperAdminController::assignAdmin');
