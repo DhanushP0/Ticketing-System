@@ -118,10 +118,6 @@
         <div class="card-header border-0 py-3">
           <div class="d-flex justify-content-between align-items-center">
             <h5 class="card-title m-0"><i class="fas fa-chart-area me-2"></i>Ticket Activity Overview</h5>
-            <div class="btn-group btn-group-sm" role="group">
-              <button type="button" class="btn btn-outline-primary active">Weekly</button>
-              <button type="button" class="btn btn-outline-primary">Monthly</button>
-            </div>
           </div>
         </div>
         <div class="card-body">
