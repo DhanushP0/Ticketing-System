@@ -261,7 +261,7 @@ class SuperadminController extends Controller
             return redirect()->to(base_url('superadmin/login'))->with('error', 'Unauthorized Access');
         }
 
-        $adminModel = new \App\Models\AdminModel(); // Load the Admin model
+        $adminModel = new AdminModel(); // Load the Admin model
         $admins = $adminModel->findAll(); // Fetch all admins from the database
 
         return view('superadmin/manageAdmins', [
@@ -279,7 +279,7 @@ class SuperadminController extends Controller
             return redirect()->to(base_url('superadmin/login'))->with('error', 'Unauthorized Access');
         }
 
-        $adminModel = new \App\Models\AdminModel();
+        $adminModel = new AdminModel();
 
         // Validate input
         $this->validate([
@@ -308,7 +308,7 @@ class SuperadminController extends Controller
     public function editAdmin()
     {
         $session = session();
-        $adminModel = new \App\Models\AdminModel();
+        $adminModel = new AdminModel();
 
         // Ensure only superadmins can access
         if (!$session->get('is_logged_in') || $session->get('role') !== 'superadmin') {
@@ -356,7 +356,7 @@ class SuperadminController extends Controller
     }
     public function deleteAdmin()
     {
-        $adminModel = new \App\Models\AdminModel();
+        $adminModel = new AdminModel();
         $id = $this->request->getPost('id'); // Get the admin ID from POST data
     
         if (!$id) {

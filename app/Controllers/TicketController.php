@@ -77,7 +77,7 @@ private function findAvailableAdmin($urgency)
 
     public function assignAdmin()
     {
-        $ticketModel = new \App\Models\TicketModel();
+        $ticketModel = new TicketModel();
         
         $ticketId = $this->request->getPost('ticket_id');
         $adminId = $this->request->getPost('admin_id');
@@ -165,7 +165,7 @@ private function findAvailableAdmin($urgency)
             return redirect()->to(base_url('user/login'))->with('error', 'Please log in first.');
         }
     
-        $ticketModel = new \App\Models\TicketModel();
+        $ticketModel = new TicketModel();
         $ticket = $ticketModel->find($ticket_id);
     
         if (!$ticket) {

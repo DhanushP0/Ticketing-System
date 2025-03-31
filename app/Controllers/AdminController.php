@@ -28,7 +28,7 @@ class AdminController extends BaseController
     public function authenticate()
     {
         $session = session(); // No need for session_start()
-        $adminModel = new \App\Models\AdminModel();
+        $adminModel = new AdminModel();
     
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
@@ -188,7 +188,7 @@ class AdminController extends BaseController
     }
     public function ticket()
     {
-        $ticketModel = new \App\Models\TicketModel();
+        $ticketModel = new TicketModel();
         $adminId = session()->get('admin_id');
 
         // Get filter values from GET request
@@ -281,7 +281,7 @@ class AdminController extends BaseController
         // Update the ticket status to 'Resolved' and set resolved_at timestamp
         $ticketModel->update($ticketId, [
             'status' => 'Resolved',
-            'resolved_at' => date('Y-m-d H:i:s') // ✅ Set resolved_at to current timestamp
+            'resolved_at' => date('Y-m-d H:i:s') //  Set resolved_at to current timestamp
         ]);
     
         // Get the admin's category
@@ -326,7 +326,7 @@ class AdminController extends BaseController
      */
     private function assignNextUnassignedTicket($adminId, $category)
     {
-        $ticketModel = new \App\Models\TicketModel();
+        $ticketModel = new TicketModel();
 
         // Find the first unassigned ticket in the same category
         $nextTicket = $ticketModel
@@ -347,8 +347,8 @@ class AdminController extends BaseController
     }
     public function viewMessages($ticketId)
     {
-        $ticketModel = new \App\Models\TicketModel();
-        $messageModel = new \App\Models\MessageModel();
+        $ticketModel = new TicketModel();
+        $messageModel = new MessageModel();
 
         // Get ticket details
         $ticket = $ticketModel->where('ticket_id', $ticketId)->first();

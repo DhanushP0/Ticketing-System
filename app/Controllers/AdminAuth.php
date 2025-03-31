@@ -8,7 +8,7 @@ class AdminAuth extends Controller
 {
     public function login()
     {
-        $adminModel = new \App\Models\AdminModel();
+        $adminModel = new AdminModel();
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
     

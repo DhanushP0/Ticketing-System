@@ -54,8 +54,8 @@ abstract class BaseController extends Controller
     {
         parent::initController($request, $response, $logger);
         
-        // ✅ Load session
-        $this->session = \Config\Services::session();
+        // Load session
+        $this->session = Services::session();
     }
     
 }
