@@ -501,6 +501,7 @@ class AdminController extends BaseController
             $responseTimes['avg_time'] ?? 0,
             $responseTimes['max_time'] ?? 0
         ]);
+        // print_r($responseTimes);exit();
 
 
         return view('admin/dashboard', $data);
