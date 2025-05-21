@@ -53,3 +53,4 @@ class AdminAuth extends Controller
         return redirect()->to('');
     }
 }
+
